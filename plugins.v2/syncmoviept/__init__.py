@@ -26,9 +26,9 @@ class SyncMoviePT(_PluginBase):
     # 插件版本
     plugin_version = "0.1"
     # 插件作者
-    plugin_author = "K0ala"
+    plugin_author = "k0ala"
     # 作者主页
-    author_url = ""
+    author_url = "liushaoxiong0@gmail.com"
     
     enabled = False
     onlyonce = False
