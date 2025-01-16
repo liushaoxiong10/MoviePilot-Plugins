@@ -18,17 +18,17 @@ from app.db.subscribe_oper import SubscribeOper
 
 class SyncMoviePT(_PluginBase):
     # 插件名称
-    plugin_name = "SyncMoviePT"
+    plugin_name = "订阅种子同步管理"
     # 插件描述
     plugin_desc = "SyncMoviePT 是一个用于同步订阅，管理种子。"
     # 插件图标
     plugin_icon = "Moviepilot_A.png"
     # 插件版本
-    plugin_version = "0.1"
+    plugin_version = "0.2"
     # 插件作者
     plugin_author = "k0ala"
     # 作者主页
-    author_url = "liushaoxiong0@gmail.com"
+    author_url = "https://github.com/liushaoxiong10"
     
     enabled = False
     onlyonce = False
