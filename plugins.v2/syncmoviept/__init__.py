@@ -1,6 +1,4 @@
-from ast import Subscript
 from asyncio.windows_events import NULL
-import ipaddress
 from typing import List, Tuple, Dict, Any, Optional
 
 from app.core.event import eventmanager, Event
@@ -10,7 +8,6 @@ from app.log import logger
 from app.plugins import _PluginBase
 from app.schemas import NotificationType, WebhookEventInfo, ServiceInfo
 from app.schemas.types import EventType
-from app.utils.ip import IpUtils
 from app.helper.downloader import DownloaderHelper
 from app.db.downloadhistory_oper import DownloadHistoryOper
 from app.db.subscribe_oper import SubscribeOper
@@ -18,17 +15,17 @@ from app.db.subscribe_oper import SubscribeOper
 
 class SyncMoviePT(_PluginBase):
     # 插件名称
-    plugin_name = "SyncMoviePT"
+    plugin_name = "订阅种子同步管理"
     # 插件描述
     plugin_desc = "SyncMoviePT 是一个用于同步订阅，管理种子。"
     # 插件图标
     plugin_icon = "Moviepilot_A.png"
     # 插件版本
-    plugin_version = "0.1"
+    plugin_version = "0.3"
     # 插件作者
-    plugin_author = "K0ala"
+    plugin_author = "k0ala"
     # 作者主页
-    author_url = ""
+    author_url = "https://github.com/liushaoxiong10"
     
     enabled = False
     onlyonce = False
@@ -58,15 +55,7 @@ class SyncMoviePT(_PluginBase):
         """
         插件API
         """
-        return [
-            {
-                "path": "/syncmoviept",
-                "endpoint": self.syncmoviept,
-                "methods": ["GET"],
-                "summary": "SyncMoviePT 是一个用于同步订阅，管理种子。",
-                "description": "SyncMoviePT 是一个用于同步订阅，管理种子。",
-            }
-        ]
+        pass
         
     def syncmoviept(self):
         """
@@ -93,7 +82,116 @@ class SyncMoviePT(_PluginBase):
  
     
     def get_form(self) -> Tuple[List[dict], Dict[str, Any]]:
-        return [], {}
+        """
+        拼装插件配置页面，需要返回两块数据：1、页面配置；2、数据结构
+        """
+        # 遍历 NotificationType 枚举，生成消息类型选项
+        msg_type_options = []
+        default_msg_type_values = []
+        for item in NotificationType:
+            msg_type_options.append({
+                "title": item.value,
+                "value": item.name
+            })
+            default_msg_type_values.append(item.name)
+        return [
+            {
+                'component': 'VForm',
+                'content': [
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12,
+                                    'md': 6
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VSwitch',
+                                        'props': {
+                                            'model': 'enabled',
+                                            'label': '启用插件',
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VTextField',
+                                        'props': {
+                                            'model': 'webhookurl',
+                                            'label': 'WebHook地址',
+                                            'placeholder': 'https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxxxxxxxxxxx',
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VTextField',
+                                        'props': {
+                                            'model': 'secret',
+                                            'label': '密钥',
+                                            'placeholder': '如设置了签名校验，请输入密钥',
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VSelect',
+                                        'props': {
+                                            'multiple': True,
+                                            'chips': True,
+                                            'model': 'msgtypes',
+                                            'label': '消息类型',
+                                            'items': msg_type_options
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                ]
+            }
+        ], {
+            "enabled": False,
+            'webhookurl': '',
+            'msgtypes': default_msg_type_values,
+            'secret': '',
+        }
     
     def get_page(self) -> List[dict]:
 

@@ -315,16 +315,17 @@
             "v2.0": "兼容MoviePilot V2"
         }
     },
-    "SyncMoviePT": {
-        "name": "订阅种子同步管理",
-        "description": "同步MoviePT订阅种子到本地下载器",
-        "labels": "下载管理",
-        "version": "0.1",
-        "icon": "Moviepilot_A.png",
+    "SubscribeManager": {
+        "name": "订阅管理",
+        "description": "自动删除下载器中的下载任务。",
+        "labels": "做种",
+        "version": "0.4",
+        "icon": "Moviepilot_A.jpg",
         "author": "k0ala",
-        "level": 1,
+        "level": 2,
         "history": {
-            "v0.1": "初始版本"
+            "v0.4": "修复同步种子时，下载器未启动的问题",
+            "v0.3": "修复同步种子时，下载器未启动的问题",
         }
     }
 }
