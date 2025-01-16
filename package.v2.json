@@ -319,11 +319,12 @@
         "name": "订阅种子同步管理",
         "description": "同步MoviePT订阅种子到本地下载器",
         "labels": "下载管理",
-        "version": "0.1",
+        "version": "0.2",
         "icon": "Moviepilot_A.png",
         "author": "k0ala",
         "level": 1,
         "history": {
+            "v0.2": "修复同步种子时，下载器未启动的问题",
             "v0.1": "初始版本"
         }
     }
