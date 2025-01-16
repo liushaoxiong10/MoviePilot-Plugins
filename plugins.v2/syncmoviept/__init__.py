@@ -58,15 +58,7 @@ class SyncMoviePT(_PluginBase):
         """
         插件API
         """
-        return [
-            {
-                "path": "/syncmoviept",
-                "endpoint": self.syncmoviept,
-                "methods": ["GET"],
-                "summary": "SyncMoviePT 是一个用于同步订阅，管理种子。",
-                "description": "SyncMoviePT 是一个用于同步订阅，管理种子。",
-            }
-        ]
+        pass
         
     def syncmoviept(self):
         """
@@ -93,7 +85,116 @@ class SyncMoviePT(_PluginBase):
  
     
     def get_form(self) -> Tuple[List[dict], Dict[str, Any]]:
-        return [], {}
+        """
+        拼装插件配置页面，需要返回两块数据：1、页面配置；2、数据结构
+        """
+        # 遍历 NotificationType 枚举，生成消息类型选项
+        msg_type_options = []
+        default_msg_type_values = []
+        for item in NotificationType:
+            msg_type_options.append({
+                "title": item.value,
+                "value": item.name
+            })
+            default_msg_type_values.append(item.name)
+        return [
+            {
+                'component': 'VForm',
+                'content': [
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12,
+                                    'md': 6
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VSwitch',
+                                        'props': {
+                                            'model': 'enabled',
+                                            'label': '启用插件',
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VTextField',
+                                        'props': {
+                                            'model': 'webhookurl',
+                                            'label': 'WebHook地址',
+                                            'placeholder': 'https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxxxxxxxxxxx',
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VTextField',
+                                        'props': {
+                                            'model': 'secret',
+                                            'label': '密钥',
+                                            'placeholder': '如设置了签名校验，请输入密钥',
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VSelect',
+                                        'props': {
+                                            'multiple': True,
+                                            'chips': True,
+                                            'model': 'msgtypes',
+                                            'label': '消息类型',
+                                            'items': msg_type_options
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                ]
+            }
+        ], {
+            "enabled": False,
+            'webhookurl': '',
+            'msgtypes': default_msg_type_values,
+            'secret': '',
+        }
     
     def get_page(self) -> List[dict]:
 
