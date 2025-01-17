@@ -319,11 +319,12 @@
         "name": "订阅种子同步管理",
         "description": "SyncMoviePT 是一个用于同步订阅，管理种子。",
         "labels": "下载管理",
-        "version": "0.2",
+        "version": "0.3",
         "icon": "Moviepilot_A.png",
         "author": "k0ala",
         "level": 1,
         "history": {
+            "v0.3": "修复同步种子时，下载器未启动的问题",
             "v0.2": "修复同步种子时，下载器未启动的问题",
             "v0.1": "初始版本"
         }

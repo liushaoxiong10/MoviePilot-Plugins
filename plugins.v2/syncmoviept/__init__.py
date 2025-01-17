@@ -1,6 +1,4 @@
-from ast import Subscript
 from asyncio.windows_events import NULL
-import ipaddress
 from typing import List, Tuple, Dict, Any, Optional
 
 from app.core.event import eventmanager, Event
@@ -10,7 +8,6 @@ from app.log import logger
 from app.plugins import _PluginBase
 from app.schemas import NotificationType, WebhookEventInfo, ServiceInfo
 from app.schemas.types import EventType
-from app.utils.ip import IpUtils
 from app.helper.downloader import DownloaderHelper
 from app.db.downloadhistory_oper import DownloadHistoryOper
 from app.db.subscribe_oper import SubscribeOper
@@ -24,7 +21,7 @@ class SyncMoviePT(_PluginBase):
     # 插件图标
     plugin_icon = "Moviepilot_A.png"
     # 插件版本
-    plugin_version = "0.2"
+    plugin_version = "0.3"
     # 插件作者
     plugin_author = "k0ala"
     # 作者主页
