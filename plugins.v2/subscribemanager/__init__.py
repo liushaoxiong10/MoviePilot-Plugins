@@ -24,7 +24,7 @@ class SubscribeManager(_PluginBase):
     # 插件图标
     plugin_icon = "Moviepilot_A.png"
     # 插件版本
-    plugin_version = "0.2"
+    plugin_version = "0.3"
     # 插件作者
     plugin_author = "k0ala"
     # 作者主页
@@ -157,38 +157,24 @@ class SubscribeManager(_PluginBase):
         }
 
     def get_page(self) -> List[dict]:
+        # 获取当前选中的Tab页
+        tab = SystemConfigOper().get("subscribe_tab")
+        if not tab:
+            tab = "subscribe-list"
         return [
             {
                 'component': 'VTabs',
+                'props': {
+                    'model': 'tab',
+                    'value': tab
+                },
                 'content': [
                     {
                         'component': 'VTab',
                         'props': {
                             'value': 'subscribe-list'
                         },
-                        'content': '订阅列表'
-                    },
-                    {
-                        'component': 'VTab', 
-                        'props': {
-                            'value': 'download-history'
-                        },
-                        'content': '下载历史'
-                    }
-                ]
-            },
-            {
-                'component': 'VWindow',
-                'props': {
-                    'model': 'tab'
-                },
-                'content': [
-                    {
-                        'component': 'VWindowItem',
-                        'props': {
-                            'value': 'subscribe-list'
-                        },
-                        'content': [
+                        'content':  [
                             {
                                 'component': 'VDataTable',
                                 'props': {
@@ -260,7 +246,7 @@ class SubscribeManager(_PluginBase):
                         ]
                     },
                     {
-                        'component': 'VWindowItem',
+                        'component': 'VTab', 
                         'props': {
                             'value': 'download-history'
                         },

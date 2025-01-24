@@ -333,11 +333,12 @@
         "name": "订阅管理",
         "description": "自动删除下载器中的下载任务。",
         "labels": "做种",
-        "version": "0.2",
-        "icon": "delete.jpg",
+        "version": "0.3",
+        "icon": "Moviepilot_A.jpg",
         "author": "k0ala",
         "level": 2,
         "history": {
+            "v0.3": "修复同步种子时，下载器未启动的问题",
             "v0.2": "修复同步种子时，下载器未启动的问题",
             "v0.1": "初始版本"
         }
