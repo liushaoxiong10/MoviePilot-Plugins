@@ -5,8 +5,6 @@ from datetime import datetime, timedelta
 from typing import List, Tuple, Dict, Any, Optional
 
 import pytz
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
 
 from app.core.config import settings
 from app.helper.downloader import DownloaderHelper
@@ -22,21 +20,21 @@ class SubscribeManager(_PluginBase):
     # 插件名称
     plugin_name = "订阅管理"
     # 插件描述
-    plugin_desc = "自动删除下载器中的下载任务。"
+    plugin_desc = "管理已订阅内容和PT种子。"
     # 插件图标
-    plugin_icon = "delete.jpg"
+    plugin_icon = "Moviepilot_A.png"
     # 插件版本
-    plugin_version = "0.1"
+    plugin_version = "0.2"
     # 插件作者
     plugin_author = "k0ala"
     # 作者主页
-    author_url = "https://github.com/jxxghp"
+    author_url = "https://github.com/liushaoxiong10"
     # 插件配置项ID前缀
     plugin_config_prefix = "subscribemanager_"
     # 加载顺序
     plugin_order = 8
     # 可使用的用户级别
-    auth_level = 2
+    auth_level = 1
 
     # 私有属性
     downloader_helper = None
@@ -86,45 +84,8 @@ class SubscribeManager(_PluginBase):
 
         self.stop_service()
 
-        if self.get_state() or self._onlyonce:
-            if self._onlyonce:
-                self._scheduler = BackgroundScheduler(timezone=settings.TZ)
-                logger.info(f"自动删种服务启动，立即运行一次")
-                self._scheduler.add_job(func=self.delete_torrents, trigger='date',
-                                        run_date=datetime.now(
-                                            tz=pytz.timezone(settings.TZ)) + timedelta(seconds=3)
-                                        )
-                # 关闭一次性开关
-                self._onlyonce = False
-                # 保存设置
-                self.update_config({
-                    "enabled": self._enabled,
-                    "notify": self._notify,
-                    "onlyonce": self._onlyonce,
-                    "action": self._action,
-                    "cron": self._cron,
-                    "downloaders": self._downloaders,
-                    "samedata": self._samedata,
-                    "mponly": self._mponly,
-                    "size": self._size,
-                    "ratio": self._ratio,
-                    "time": self._time,
-                    "upspeed": self._upspeed,
-                    "labels": self._labels,
-                    "pathkeywords": self._pathkeywords,
-                    "trackerkeywords": self._trackerkeywords,
-                    "errorkeywords": self._errorkeywords,
-                    "torrentstates": self._torrentstates,
-                    "torrentcategorys": self._torrentcategorys
-
-                })
-                if self._scheduler.get_jobs():
-                    # 启动服务
-                    self._scheduler.print_jobs()
-                    self._scheduler.start()
-
     def get_state(self) -> bool:
-        return True if self._enabled and self._cron and self._downloaders else False
+        return True if self._enabled else False
 
     @staticmethod
     def get_command() -> List[Dict[str, Any]]:
@@ -144,14 +105,6 @@ class SubscribeManager(_PluginBase):
             "kwargs": {} # 定时器参数
         }]
         """
-        if self.get_state():
-            return [{
-                "id": "TorrentRemover",
-                "name": "自动删种服务",
-                "trigger": CronTrigger.from_crontab(self._cron),
-                "func": self.delete_torrents,
-                "kwargs": {}
-            }]
         return []
 
     def get_form(self) -> Tuple[List[dict], Dict[str, Any]]:
@@ -196,393 +149,245 @@ class SubscribeManager(_PluginBase):
                             }
                         ]
                     },
+                 ]
+            }
+        ], {
+            "enabled": False,
+            "notify": False,
+        }
+
+    def get_page(self) -> List[dict]:
+        return [
+            {
+                'component': 'VTabs',
+                'content': [
                     {
-                        'component': 'VRow',
+                        'component': 'VTab',
+                        'props': {
+                            'value': 'subscribe-list'
+                        },
+                        'content': '订阅列表'
+                    },
+                    {
+                        'component': 'VTab', 
+                        'props': {
+                            'value': 'download-history'
+                        },
+                        'content': '下载历史'
+                    }
+                ]
+            },
+            {
+                'component': 'VWindow',
+                'props': {
+                    'model': 'tab'
+                },
+                'content': [
+                    {
+                        'component': 'VWindowItem',
+                        'props': {
+                            'value': 'subscribe-list'
+                        },
                         'content': [
                             {
-                                'component': 'VCol',
+                                'component': 'VDataTable',
                                 'props': {
-                                    'cols': 12,
-                                    'md': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VCronField',
-                                        'props': {
-                                            'model': 'cron',
-                                            'label': '执行周期',
-                                            'placeholder': '0 */12 * * *'
+                                    'headers': [
+                                        {'title': '订阅名称', 'key': 'name'},
+                                        {'title': '类型', 'key': 'type'},
+                                        {'title': '状态', 'key': 'state'},
+                                        {'title': '操作', 'key': 'actions'}
+                                    ],
+                                    'items.server': {
+                                        'url': '/api/v1/subscribe/list',
+                                        'method': 'get',
+                                        'params': {
+                                            'page': '@page',
+                                            'size': '@itemsPerPage'
                                         }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 12,
-                                    'md': 6
+                                    },
+                                    'itemsPerPage': 10,
+                                    'expandable': True
                                 },
-                                'content': [
-                                    {
-                                        'component': 'VSelect',
+                                'slots': {
+                                    'expanded-row': {
+                                        'component': 'VDataTable',
                                         'props': {
-                                            'model': 'action',
-                                            'label': '动作',
-                                            'items': [
-                                                {'title': '暂停', 'value': 'pause'},
-                                                {'title': '删除种子', 'value': 'delete'},
-                                                {'title': '删除种子和文件', 'value': 'deletefile'}
-                                            ]
+                                            'headers': [
+                                                {'title': '标题', 'key': 'title'},
+                                                {'title': '大小', 'key': 'size'},
+                                                {'title': '状态', 'key': 'state'},
+                                                {'title': '操作', 'key': 'actions'}
+                                            ],
+                                            'items.server': {
+                                                'url': '/api/v1/subscribe/downloads',
+                                                'method': 'get',
+                                                'params': {
+                                                    'subscribe_id': '@item.id',
+                                                    'page': '@page',
+                                                    'size': '@itemsPerPage'
+                                                }
+                                            },
+                                            'itemsPerPage': 5
                                         }
+                                    },
+                                    'item.actions': {
+                                        'component': 'VBtn',
+                                        'props': {
+                                            'icon': true,
+                                            'size': 'small',
+                                            'color': 'error',
+                                            'onClick': {
+                                                'action': 'delete',
+                                                'url': '/api/v1/subscribe/delete',
+                                                'params': {
+                                                    'id': '@item.id'
+                                                }
+                                            }
+                                        },
+                                        'content': [
+                                            {
+                                                'component': 'VIcon',
+                                                'props': {
+                                                    'size': 'small'
+                                                },
+                                                'content': 'mdi-delete'
+                                            }
+                                        ]
                                     }
-                                ]
+                                }
                             }
                         ]
                     },
                     {
-                        'component': 'VRow',
+                        'component': 'VWindowItem',
+                        'props': {
+                            'value': 'download-history'
+                        },
                         'content': [
                             {
-                                'component': 'VCol',
+                                'component': 'VDataTable',
                                 'props': {
-                                    'cols': 12
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VSelect',
-                                        'props': {
-                                            'multiple': True,
-                                            'chips': True,
-                                            'clearable': True,
-                                            'model': 'downloaders',
-                                            'label': '下载器',
-                                            'items': [{"title": config.name, "value": config.name}
-                                                      for config in self.downloader_helper.get_configs().values()]
+                                    'headers': [
+                                        {'title': '标题', 'key': 'title'},
+                                        {'title': '下载器', 'key': 'downloader'},
+                                        {'title': '保存路径', 'key': 'path'},
+                                        {'title': '状态', 'key': 'state'},
+                                        {'title': '操作', 'key': 'actions'}
+                                    ],
+                                    'items.server': {
+                                        'url': '/api/v1/history/list',
+                                        'method': 'get',
+                                        'params': {
+                                            'page': '@page',
+                                            'size': '@itemsPerPage'
                                         }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        'component': 'VRow',
-                        'content': [
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
+                                    },
+                                    'itemsPerPage': 10
                                 },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
+                                'slots': {
+                                    'item.actions': {
+                                        'component': 'VBtn',
                                         'props': {
-                                            'model': 'size',
-                                            'label': '种子大小（GB）',
-                                            'placeholder': '例如1-10'
-                                        }
+                                            'icon': true,
+                                            'size': 'small',
+                                            'color': 'error',
+                                            'onClick': {
+                                                'action': 'delete',
+                                                'url': '/api/v1/history/delete',
+                                                'params': {
+                                                    'id': '@item.id'
+                                                }
+                                            }
+                                        },
+                                        'content': [
+                                            {
+                                                'component': 'VIcon',
+                                                'props': {
+                                                    'size': 'small'
+                                                },
+                                                'content': 'mdi-delete'
+                                            }
+                                        ]
                                     }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'ratio',
-                                            'label': '分享率',
-                                            'placeholder': ''
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'time',
-                                            'label': '做种时间（小时）',
-                                            'placeholder': ''
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'upspeed',
-                                            'label': '平均上传速度',
-                                            'placeholder': ''
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'labels',
-                                            'label': '标签',
-                                            'placeholder': '用,分隔多个标签'
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'pathkeywords',
-                                            'label': '保存路径关键词',
-                                            'placeholder': '支持正式表达式'
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'trackerkeywords',
-                                            'label': 'Tracker关键词',
-                                            'placeholder': '支持正式表达式'
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'errorkeywords',
-                                            'label': '错误信息关键词（TR）',
-                                            'placeholder': '支持正式表达式，仅适用于TR'
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'torrentstates',
-                                            'label': '任务状态（QB）',
-                                            'placeholder': '用,分隔多个状态，仅适用于QB'
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 6
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'torrentcategorys',
-                                            'label': '任务分类',
-                                            'placeholder': '用,分隔多个分类'
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        'component': 'VRow',
-                        'content': [
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 12,
-                                    'md': 4
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VSwitch',
-                                        'props': {
-                                            'model': 'samedata',
-                                            'label': '处理辅种',
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 12,
-                                    'md': 4
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VSwitch',
-                                        'props': {
-                                            'model': 'mponly',
-                                            'label': '仅MoviePilot任务',
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 12,
-                                    'md': 4
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VSwitch',
-                                        'props': {
-                                            'model': 'onlyonce',
-                                            'label': '立即运行一次',
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        'component': 'VRow',
-                        'content': [
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 12,
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VAlert',
-                                        'props': {
-                                            'type': 'info',
-                                            'variant': 'tonal',
-                                            'text': '自动删种存在风险，如设置不当可能导致数据丢失！建议动作先选择暂停，确定条件正确后再改成删除。'
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        'component': 'VRow',
-                        'content': [
-                            {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 12,
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VAlert',
-                                        'props': {
-                                            'type': 'info',
-                                            'variant': 'tonal',
-                                            'text': '任务状态（QB）字典：'
-                                                    'downloading：正在下载-传输数据，'
-                                                    'stalledDL：正在下载_未建立连接，'
-                                                    'uploading：正在上传-传输数据，'
-                                                    'stalledUP：正在上传-未建立连接，'
-                                                    'error：暂停-发生错误，'
-                                                    'pausedDL：暂停-下载未完成，'
-                                                    'pausedUP：暂停-下载完成，'
-                                                    'missingFiles：暂停-文件丢失，'
-                                                    'checkingDL：检查中-下载未完成，'
-                                                    'checkingUP：检查中-下载完成，'
-                                                    'checkingResumeData：检查中-启动时恢复数据，'
-                                                    'forcedDL：强制下载-忽略队列，'
-                                                    'queuedDL：等待下载-排队，'
-                                                    'forcedUP：强制上传-忽略队列，'
-                                                    'queuedUP：等待上传-排队，'
-                                                    'allocating：分配磁盘空间，'
-                                                    'metaDL：获取元数据，'
-                                                    'moving：移动文件，'
-                                                    'unknown：未知状态'
-                                        }
-                                    }
-                                ]
+                                }
                             }
                         ]
                     }
                 ]
             }
-        ], {
-            "enabled": False,
-            "notify": False,
-            "onlyonce": False,
-            "action": 'pause',
-            'downloaders': [],
-            "cron": '0 */12 * * *',
-            "samedata": False,
-            "mponly": False,
-            "size": "",
-            "ratio": "",
-            "time": "",
-            "upspeed": "",
-            "labels": "",
-            "pathkeywords": "",
-            "trackerkeywords": "",
-            "errorkeywords": "",
-            "torrentstates": "",
-            "torrentcategorys": ""
+        ]
+
+  
+    @staticmethod
+    def get_api(self) -> List[Dict[str, Any]]:
+        """
+        注册API
+        """
+        return [
+            {
+                "path": "/api/v1/history/list",
+                "endpoint": self.list_history,
+                "methods": ["GET"],
+                "summary": "查询下载历史记录",
+                "description": "分页查询下载历史记录列表"
+            },
+            {
+                "path": "/api/v1/history/delete", 
+                "endpoint": self.delete_history,
+                "methods": ["DELETE"],
+                "summary": "删除下载历史记录",
+                "description": "根据ID删除指定的下载历史记录"
+            }
+        ]
+
+    @staticmethod
+    def list_history(request):
+        """
+        查询下载历史记录
+        """
+        page = request.query.get("page") or 1
+        size = request.query.get("size") or 10
+        
+        # 调用下载历史记录查询接口
+        history_list = DownloadHistoryOper().list(page=int(page), size=int(size))
+        
+        # 组装返回数据
+        items = []
+        for history in history_list:
+            items.append({
+                "id": history.id,
+                "title": history.title,
+                "downloader": history.downloader,
+                "path": history.path,
+                "state": history.state
+            })
+            
+        return {
+            "code": 0,
+            "items": items,
+            "total": len(items)
         }
 
-    def get_page(self) -> List[dict]:
-        pass
+    @staticmethod
+    def delete_history(request):
+        """
+        删除下载历史记录
+        """
+        history_id = request.query.get("id")
+        if not history_id:
+            return {"code": 1, "msg": "未指定要删除的记录"}
+            
+        # 调用下载历史记录删除接口
+        DownloadHistoryOper().delete(history_id)
+        
+        return {"code": 0}
 
     def stop_service(self):
         """
         退出插件
         """
-        try:
-            if self._scheduler:
-                self._scheduler.remove_all_jobs()
-                if self._scheduler.running:
-                    self._event.set()
-                    self._scheduler.shutdown()
-                    self._event.clear()
-                self._scheduler = None
-        except Exception as e:
-            print(str(e))
+        pass
 
     @property
     def service_infos(self) -> Optional[Dict[str, ServiceInfo]]:
