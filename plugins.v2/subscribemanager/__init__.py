@@ -24,7 +24,7 @@ class SubscribeManager(_PluginBase):
     # 插件图标
     plugin_icon = "Moviepilot_A.png"
     # 插件版本
-    plugin_version = "0.3"
+    plugin_version = "0.4"
     # 插件作者
     plugin_author = "k0ala"
     # 作者主页
@@ -218,7 +218,6 @@ class SubscribeManager(_PluginBase):
                                     'item.actions': {
                                         'component': 'VBtn',
                                         'props': {
-                                            'icon': true,
                                             'size': 'small',
                                             'color': 'error',
                                             'onClick': {
@@ -273,7 +272,6 @@ class SubscribeManager(_PluginBase):
                                     'item.actions': {
                                         'component': 'VBtn',
                                         'props': {
-                                            'icon': true,
                                             'size': 'small',
                                             'color': 'error',
                                             'onClick': {
