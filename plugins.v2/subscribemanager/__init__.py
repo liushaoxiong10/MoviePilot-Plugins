@@ -184,7 +184,7 @@ class SubscribeManager(_PluginBase):
                                 'component': 'VBtn',
                                 'props': {
                                     'size': 'small',
-                                    'color': 'error',
+                                    'color': 'blue',
                                     'onClick': {
                                         'action': 'delete',
                                         'url': '/api/v1/subscribe/delete',
@@ -273,59 +273,6 @@ class SubscribeManager(_PluginBase):
                 ]
             }
         ]
-
-        # subs = SubscribeOper().list()
-        # items = []
-        # for sub in subs:
-        #     items.append({
-        #         "id": sub.id,
-        #         "name": sub.name,
-        #         "state": sub.state,
-        #         "actions": [{
-        #             'component': 'VBtn',
-        #             'props': {
-        #                'size': 'small',
-        #                'color': 'error',                                 'onClick': {
-        #                     'action': 'delete',
-        #                     'url': '/api/v1/subscribe/delete',
-        #                     'params': {
-        #                     'id': sub.id,
-        #                     }
-        #                 }
-        #             }
-        #         }]
-        #     })
-
-
-        
-        # return [
-        #     {
-        #         'component': 'VRow',
-        #         "content": [
-        #             {
-        #                 'component': 'VCol',
-        #                 'props': {
-        #                     'cols': 12,
-        #                 },
-        #                 'content': [
-        #                      {
-        #                         'component': 'VDataTable',
-        #                         'props': {
-        #                             'headers': [
-        #                                 {'title': '订阅名称', 'key': 'name'},
-        #                                 {'title': '类型', 'key': 'type'},
-        #                                 {'title': '状态', 'key': 'state'},
-        #                                 {'title': '操作', 'key': 'actions'}
-        #                             ],
-        #                             'items': items,
-        #                             'items-per-page-options': 10
-        #                         },
-        #                     }
-        #                 ]
-        #             }
-        #         ]
-        #     }
-        # ]
 
   
     @staticmethod
