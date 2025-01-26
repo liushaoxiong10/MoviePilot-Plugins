@@ -204,32 +204,8 @@ class SubscribeManager(_PluginBase):
                                         {'title': '操作', 'key': 'actions'}
                                     ],
                                     'items': items,
-                                    'itemsPerPage': 10,
-                                    'expandable': True
+                                    'items-per-page-options': 10
                                 },
-                                'slots': {
-                                    'expanded-row': {
-                                        'component': 'VDataTable',
-                                        'props': {
-                                            'headers': [
-                                                {'title': '标题', 'key': 'title'},
-                                                {'title': '大小', 'key': 'size'},
-                                                {'title': '状态', 'key': 'state'},
-                                                {'title': '操作', 'key': 'actions'}
-                                            ],
-                                            'items.server': {
-                                                'url': '/api/v1/subscribe/downloads',
-                                                'method': 'get',
-                                                'params': {
-                                                    'subscribe_id': '@item.id',
-                                                    'page': '@page',
-                                                    'size': '@itemsPerPage'
-                                                }
-                                            },
-                                            'itemsPerPage': 5
-                                        }
-                                    }
-                                }
                             }
                         ]
                     }
