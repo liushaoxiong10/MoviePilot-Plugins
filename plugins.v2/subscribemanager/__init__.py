@@ -160,6 +160,7 @@ class SubscribeManager(_PluginBase):
 
     def get_page(self) -> List[dict]:
         subs = SubscribeOper().list()
+        downs = DownloadHistoryOper().list()
         items = []
         for sub in subs:
             items.append({
@@ -190,6 +191,52 @@ class SubscribeManager(_PluginBase):
                                         'url': '/api/v1/subscribe/delete',
                                         'params': {
                                             'id': sub.id
+                                        }
+                                    }
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VIcon',
+                                        'props': {
+                                            'size': 'small'
+                                        },
+                                        'content': 'mdi-delete'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            })
+        for down in downs:
+            items.append({
+                'component': 'tr',
+                'content': [
+                    {
+                        'component': 'td',
+                        'text': down.title
+                    },
+                    {
+                        'component': 'td',
+                        'text': down.downloader
+                    },
+                    {
+                        'component': 'td',
+                        'text': down.state
+                    },
+                    {
+                        'component': 'td',
+                        'content': [
+                            {
+                                'component': 'VBtn',
+                                'props': {
+                                    'size': 'small',
+                                    'color': 'blue',
+                                    'onClick': {
+                                        'action': 'delete',
+                                        'url': '/api/v1/history/delete',
+                                        'params': {
+                                            'id': down.id
                                         }
                                     }
                                 },
