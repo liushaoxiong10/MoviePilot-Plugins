@@ -167,7 +167,7 @@ class SubscribeManager(_PluginBase):
                 "id": sub.id,
                 "name": sub.name,
                 "state": sub.state,
-                "actions": {
+                "actions": [{
                     'component': 'VBtn',
                     'props': {
                        'size': 'small',
@@ -179,7 +179,7 @@ class SubscribeManager(_PluginBase):
                             }
                         }
                     }
-                }
+                }]
             })
 
 
