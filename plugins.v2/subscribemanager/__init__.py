@@ -161,6 +161,38 @@ class SubscribeManager(_PluginBase):
         tab = "subscribe-list"
         return [
             {
+                'component': 'VCard',
+                'props': {
+                    'title': '订阅管理',
+                    'icon': 'mdi-download'
+                },
+                'content': [
+                    {
+                        'component': 'VTabs',
+                        'props': {
+                            'model': 'tab',
+                            'value': 'subscribe-list'
+                        },
+                        'content': [
+                            {
+                                'component': 'VTab',
+                                'props': {
+                                    'value': 'subscribe-list'
+                                },
+                                'http':"vt1",
+                            },
+                            {
+                                'component': 'VTab',
+                                'props': {
+                                    'value': 'download-history'
+                                },
+                                'http':"vt2",
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
                 'component': 'VTabs',
                 'props': {
                     'model': 'tab',
