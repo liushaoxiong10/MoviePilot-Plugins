@@ -12,6 +12,8 @@ from app.log import logger
 from app.plugins import _PluginBase
 from app.schemas import NotificationType, ServiceInfo
 from app.utils.string import StringUtils
+from app.db.downloadhistory_oper import DownloadHistoryOper
+from app.db.subscribe_oper import SubscribeOper
 
 lock = threading.Lock()
 
@@ -157,55 +159,18 @@ class SubscribeManager(_PluginBase):
         }
 
     def get_page(self) -> List[dict]:
-        # 获取当前选中的Tab页
-        tab = "subscribe-list"
+        
         return [
             {
-                'component': 'VCard',
-                'props': {
-                    'title': '订阅管理',
-                    'icon': 'mdi-download'
-                },
-                'content': [
+                'component': 'VRow',
+                "content": [
                     {
-                        'component': 'VTabs',
+                        'component': 'VCol',
                         'props': {
-                            'model': 'tab',
-                            'value': 'subscribe-list'
+                            'cols': 12,
                         },
                         'content': [
-                            {
-                                'component': 'VTab',
-                                'props': {
-                                    'value': 'subscribe-list'
-                                },
-                                'http':"vt1",
-                            },
-                            {
-                                'component': 'VTab',
-                                'props': {
-                                    'value': 'download-history'
-                                },
-                                'http':"vt2",
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                'component': 'VTabs',
-                'props': {
-                    'model': 'tab',
-                    'value': tab
-                },
-                'content': [
-                    {
-                        'component': 'VTab',
-                        'props': {
-                            'value': 'subscribe-list'
-                        },
-                        'content':  [
-                            {
+                             {
                                 'component': 'VDataTable',
                                 'props': {
                                     'headers': [
@@ -273,60 +238,6 @@ class SubscribeManager(_PluginBase):
                                 }
                             }
                         ]
-                    },
-                    {
-                        'component': 'VTab', 
-                        'props': {
-                            'value': 'download-history'
-                        },
-                        'content': [
-                            {
-                                'component': 'VDataTable',
-                                'props': {
-                                    'headers': [
-                                        {'title': '标题', 'key': 'title'},
-                                        {'title': '下载器', 'key': 'downloader'},
-                                        {'title': '保存路径', 'key': 'path'},
-                                        {'title': '状态', 'key': 'state'},
-                                        {'title': '操作', 'key': 'actions'}
-                                    ],
-                                    'items.server': {
-                                        'url': '/api/v1/history/list',
-                                        'method': 'get',
-                                        'params': {
-                                            'page': '@page',
-                                            'size': '@itemsPerPage'
-                                        }
-                                    },
-                                    'itemsPerPage': 10
-                                },
-                                'slots': {
-                                    'item.actions': {
-                                        'component': 'VBtn',
-                                        'props': {
-                                            'size': 'small',
-                                            'color': 'error',
-                                            'onClick': {
-                                                'action': 'delete',
-                                                'url': '/api/v1/history/delete',
-                                                'params': {
-                                                    'id': '@item.id'
-                                                }
-                                            }
-                                        },
-                                        'content': [
-                                            {
-                                                'component': 'VIcon',
-                                                'props': {
-                                                    'size': 'small'
-                                                },
-                                                'content': 'mdi-delete'
-                                            }
-                                        ]
-                                    }
-                                }
-                            }
-                        ]
                     }
                 ]
             }
@@ -352,8 +263,31 @@ class SubscribeManager(_PluginBase):
                 "methods": ["DELETE"],
                 "summary": "删除下载历史记录",
                 "description": "根据ID删除指定的下载历史记录"
+            },
+            {
+                "path": "/api/v1/subscribe/list",
+                "endpoint": self.list_subscribe,
+                "methods": ["GET"],
+                "summary": "查询订阅列表",
+                "description": "分页查询订阅列表"
             }
         ]
+
+    @staticmethod   
+    def list_subscribe(request):
+        """
+        查询订阅列表
+        """
+        page = request.query.get("page") or 1
+        size = request.query.get("size") or 10
+        
+        # 调用订阅查询接口
+        subscribe_list = SubscribeOper().list(page=int(page), size=int(size))
+        return {
+            "code": 0,
+            "items": subscribe_list,
+            "total": len(subscribe_list)
+        }
 
     @staticmethod
     def list_history(request):
