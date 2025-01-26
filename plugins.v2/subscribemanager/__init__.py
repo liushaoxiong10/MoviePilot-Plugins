@@ -160,7 +160,7 @@ class SubscribeManager(_PluginBase):
 
     def get_page(self) -> List[dict]:
         subs = SubscribeOper().list()
-        downs = DownloadHistoryOper().list()
+        downs = DownloadHistoryOper().list_by_page()
         items = []
         for sub in subs:
             items.append({
