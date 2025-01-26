@@ -322,7 +322,7 @@
         "version": "0.4",
         "icon": "Moviepilot_A.jpg",
         "author": "k0ala",
-        "level": 2,
+        "level": 1,
         "history": {
             "v0.4": "修复同步种子时，下载器未启动的问题",
             "v0.3": "修复同步种子时，下载器未启动的问题"
