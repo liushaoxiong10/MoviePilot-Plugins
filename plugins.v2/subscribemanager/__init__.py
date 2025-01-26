@@ -159,59 +159,173 @@ class SubscribeManager(_PluginBase):
         }
 
     def get_page(self) -> List[dict]:
-
         subs = SubscribeOper().list()
         items = []
         for sub in subs:
             items.append({
-                "id": sub.id,
-                "name": sub.name,
-                "state": sub.state,
-                "actions": [{
-                    'component': 'VBtn',
-                    'props': {
-                       'size': 'small',
-                       'color': 'error',                                 'onClick': {
-                            'action': 'delete',
-                            'url': '/api/v1/subscribe/delete',
-                            'params': {
-                            'id': sub.id,
+                'component': 'tr',
+                'content': [
+                    {
+                        'component': 'td',
+                        'text': sub.name
+                    },
+                    {
+                        'component': 'td', 
+                        'text': sub.type
+                    },
+                    {
+                        'component': 'td',
+                        'text': sub.state
+                    },
+                    {
+                        'component': 'td',
+                        'content': [
+                            {
+                                'component': 'VBtn',
+                                'props': {
+                                    'size': 'small',
+                                    'color': 'error',
+                                    'onClick': {
+                                        'action': 'delete',
+                                        'url': '/api/v1/subscribe/delete',
+                                        'params': {
+                                            'id': sub.id
+                                        }
+                                    }
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VIcon',
+                                        'props': {
+                                            'size': 'small'
+                                        },
+                                        'content': 'mdi-delete'
+                                    }
+                                ]
                             }
-                        }
+                        ]
                     }
-                }]
+                ]
             })
 
-
-        
         return [
             {
                 'component': 'VRow',
-                "content": [
+                'content': [
                     {
                         'component': 'VCol',
                         'props': {
-                            'cols': 12,
+                            'cols': 12
                         },
                         'content': [
-                             {
-                                'component': 'VDataTable',
+                            {
+                                'component': 'VTable',
                                 'props': {
-                                    'headers': [
-                                        {'title': '订阅名称', 'key': 'name'},
-                                        {'title': '类型', 'key': 'type'},
-                                        {'title': '状态', 'key': 'state'},
-                                        {'title': '操作', 'key': 'actions'}
-                                    ],
-                                    'items': items,
-                                    'items-per-page-options': 10
+                                    'hover': True
                                 },
+                                'content': [
+                                    {
+                                        'component': 'thead',
+                                        'content': [
+                                            {
+                                                'component': 'tr',
+                                                'content': [
+                                                    {
+                                                        'component': 'th',
+                                                        'props': {
+                                                            'class': 'text-start ps-4'
+                                                        },
+                                                        'text': '订阅名称'
+                                                    },
+                                                    {
+                                                        'component': 'th',
+                                                        'props': {
+                                                            'class': 'text-start ps-4'
+                                                        },
+                                                        'text': '类型'
+                                                    },
+                                                    {
+                                                        'component': 'th',
+                                                        'props': {
+                                                            'class': 'text-start ps-4'
+                                                        },
+                                                        'text': '状态'
+                                                    },
+                                                    {
+                                                        'component': 'th',
+                                                        'props': {
+                                                            'class': 'text-start ps-4'
+                                                        },
+                                                        'text': '操作'
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        'component': 'tbody',
+                                        'content': items
+                                    }
+                                ]
                             }
                         ]
                     }
                 ]
             }
         ]
+
+        # subs = SubscribeOper().list()
+        # items = []
+        # for sub in subs:
+        #     items.append({
+        #         "id": sub.id,
+        #         "name": sub.name,
+        #         "state": sub.state,
+        #         "actions": [{
+        #             'component': 'VBtn',
+        #             'props': {
+        #                'size': 'small',
+        #                'color': 'error',                                 'onClick': {
+        #                     'action': 'delete',
+        #                     'url': '/api/v1/subscribe/delete',
+        #                     'params': {
+        #                     'id': sub.id,
+        #                     }
+        #                 }
+        #             }
+        #         }]
+        #     })
+
+
+        
+        # return [
+        #     {
+        #         'component': 'VRow',
+        #         "content": [
+        #             {
+        #                 'component': 'VCol',
+        #                 'props': {
+        #                     'cols': 12,
+        #                 },
+        #                 'content': [
+        #                      {
+        #                         'component': 'VDataTable',
+        #                         'props': {
+        #                             'headers': [
+        #                                 {'title': '订阅名称', 'key': 'name'},
+        #                                 {'title': '类型', 'key': 'type'},
+        #                                 {'title': '状态', 'key': 'state'},
+        #                                 {'title': '操作', 'key': 'actions'}
+        #                             ],
+        #                             'items': items,
+        #                             'items-per-page-options': 10
+        #                         },
+        #                     }
+        #                 ]
+        #             }
+        #         ]
+        #     }
+        # ]
 
   
     @staticmethod
