@@ -159,6 +159,30 @@ class SubscribeManager(_PluginBase):
         }
 
     def get_page(self) -> List[dict]:
+
+        subs = SubscribeOper().list()
+        items = []
+        for sub in subs:
+            items.append({
+                "id": sub.id,
+                "name": sub.name,
+                "state": sub.state,
+                "actions": {
+                    'component': 'VBtn',
+                    'props': {
+                       'size': 'small',
+                       'color': 'error',                                 'onClick': {
+                            'action': 'delete',
+                            'url': '/api/v1/subscribe/delete',
+                            'params': {
+                            'id': sub.id,
+                            }
+                        }
+                    }
+                }
+            })
+
+
         
         return [
             {
@@ -179,14 +203,7 @@ class SubscribeManager(_PluginBase):
                                         {'title': '状态', 'key': 'state'},
                                         {'title': '操作', 'key': 'actions'}
                                     ],
-                                    'items.server': {
-                                        'url': '/api/v1/subscribe/list',
-                                        'method': 'get',
-                                        'params': {
-                                            'page': '@page',
-                                            'size': '@itemsPerPage'
-                                        }
-                                    },
+                                    'items': items,
                                     'itemsPerPage': 10,
                                     'expandable': True
                                 },
@@ -211,29 +228,6 @@ class SubscribeManager(_PluginBase):
                                             },
                                             'itemsPerPage': 5
                                         }
-                                    },
-                                    'item.actions': {
-                                        'component': 'VBtn',
-                                        'props': {
-                                            'size': 'small',
-                                            'color': 'error',
-                                            'onClick': {
-                                                'action': 'delete',
-                                                'url': '/api/v1/subscribe/delete',
-                                                'params': {
-                                                    'id': '@item.id'
-                                                }
-                                            }
-                                        },
-                                        'content': [
-                                            {
-                                                'component': 'VIcon',
-                                                'props': {
-                                                    'size': 'small'
-                                                },
-                                                'content': 'mdi-delete'
-                                            }
-                                        ]
                                     }
                                 }
                             }
