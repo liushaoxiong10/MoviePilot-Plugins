@@ -44,6 +44,8 @@ class SubscribeManager(_PluginBase):
     _scheduler = None
     _enabled = False
     _onlyonce = False
+
+    # 弃用
     _notify = False
     # pause/delete
     _downloaders = []
@@ -67,24 +69,15 @@ class SubscribeManager(_PluginBase):
         if config:
             self._enabled = config.get("enabled")
             self._onlyonce = config.get("onlyonce")
-            self._notify = config.get("notify")
-            self._downloaders = config.get("downloaders") or []
-            self._action = config.get("action")
-            self._cron = config.get("cron")
-            self._samedata = config.get("samedata")
-            self._mponly = config.get("mponly")
-            self._size = config.get("size") or ""
-            self._ratio = config.get("ratio")
-            self._time = config.get("time")
-            self._upspeed = config.get("upspeed")
-            self._labels = config.get("labels") or ""
-            self._pathkeywords = config.get("pathkeywords") or ""
-            self._trackerkeywords = config.get("trackerkeywords") or ""
-            self._errorkeywords = config.get("errorkeywords") or ""
-            self._torrentstates = config.get("torrentstates") or ""
-            self._torrentcategorys = config.get("torrentcategorys") or ""
+            _titles = config.get("titles") or []
+            _episodes = config.get("episodes") or []
 
         self.stop_service()
+        self.clear_history(_titles, _episodes)
+
+    def clear_history(self, titles: List[str], episodes: List[str]):
+        logger.info(f"清除下载历史记录：{titles} {episodes}")
+        pass    
 
     def get_state(self) -> bool:
         return True if self._enabled else False
@@ -115,7 +108,7 @@ class SubscribeManager(_PluginBase):
         
         # 构造标题和剧集列表
         titles = []
-        episodes = []
+        episode_options = []
         
         for history in histories:
             # 标题列表
@@ -128,12 +121,11 @@ class SubscribeManager(_PluginBase):
                 episode_str += f" {history.seasons}"
             if history.episodes:
                 episode_str += f" {history.episodes}"
-            if episode_str not in episodes:
-                episodes.append(episode_str)
+            episode_options.append({"title": episode_str, "value": history.id})
+
                 
         # 将列表转换为选择框选项格式
         title_options = [{"title": t, "value": t} for t in titles]
-        episode_options = [{"title": e, "value": e} for e in episodes]
 
         # 标题和剧集选择框
         title_select = {
@@ -344,88 +336,8 @@ class SubscribeManager(_PluginBase):
         """
         注册API
         """
-        return [
-            {
-                "path": "/api/v1/history/list",
-                "endpoint": self.list_history,
-                "methods": ["GET"],
-                "summary": "查询下载历史记录",
-                "description": "分页查询下载历史记录列表"
-            },
-            {
-                "path": "/api/v1/history/delete", 
-                "endpoint": self.delete_history,
-                "methods": ["DELETE"],
-                "summary": "删除下载历史记录",
-                "description": "根据ID删除指定的下载历史记录"
-            },
-            {
-                "path": "/api/v1/subscribe/list",
-                "endpoint": self.list_subscribe,
-                "methods": ["GET"],
-                "summary": "查询订阅列表",
-                "description": "分页查询订阅列表"
-            }
-        ]
-
-    @staticmethod   
-    def list_subscribe(request):
-        """
-        查询订阅列表
-        """
-        page = request.query.get("page") or 1
-        size = request.query.get("size") or 10
-        
-        # 调用订阅查询接口
-        subscribe_list = SubscribeOper().list(page=int(page), size=int(size))
-        return {
-            "code": 0,
-            "items": subscribe_list,
-            "total": len(subscribe_list)
-        }
-
-    @staticmethod
-    def list_history(request):
-        """
-        查询下载历史记录
-        """
-        page = request.query.get("page") or 1
-        size = request.query.get("size") or 10
-        
-        # 调用下载历史记录查询接口
-        history_list = DownloadHistoryOper().list(page=int(page), size=int(size))
-        
-        # 组装返回数据
-        items = []
-        for history in history_list:
-            items.append({
-                "id": history.id,
-                "title": history.title,
-                "downloader": history.downloader,
-                "path": history.path,
-                "state": history.state
-            })
-            
-        return {
-            "code": 0,
-            "items": items,
-            "total": len(items)
-        }
-
-    @staticmethod
-    def delete_history(request):
-        """
-        删除下载历史记录
-        """
-        history_id = request.query.get("id")
-        if not history_id:
-            return {"code": 1, "msg": "未指定要删除的记录"}
-            
-        # 调用下载历史记录删除接口
-        DownloadHistoryOper().delete(history_id)
-        
-        return {"code": 0}
-
+        pass
+    
     def stop_service(self):
         """
         退出插件
