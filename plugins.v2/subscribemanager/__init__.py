@@ -181,39 +181,15 @@ class SubscribeManager(_PluginBase):
                     },
                     {
                         'component': 'td',
-                        'text': down.title + " " + down.seasons + " " + down.episodes
+                        'text': down.title
+                    },
+                    {
+                        'component': 'td',
+                        'text':down.seasons + " " + down.episodes
                     },
                     {
                         'component': 'td',
                         'text': down.torrent_name
-                    },
-                    {
-                        'component': 'td',
-                        'content': [
-                            {
-                                'component': 'VBtn',
-                                'props': {
-                                    'size': 'small',
-                                    'color': 'blue',
-                                    'onClick': {
-                                        'action': 'delete',
-                                        'url': '/api/v1/history/delete',
-                                        'params': {
-                                            'id': down.id
-                                        }
-                                    }
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VIcon',
-                                        'props': {
-                                            'size': 'small'
-                                        },
-                                        'content': 'mdi-delete'
-                                    }
-                                ]
-                            }
-                        ]
                     }
                 ]
             })
@@ -245,28 +221,28 @@ class SubscribeManager(_PluginBase):
                                                         'props': {
                                                             'class': 'text-start ps-4'
                                                         },
-                                                        'text': '订阅名称'
+                                                        'text': 'id'
                                                     },
                                                     {
                                                         'component': 'th',
                                                         'props': {
                                                             'class': 'text-start ps-4'
                                                         },
-                                                        'text': '类型'
+                                                        'text': '名称'
+                                                    },
+                                                      {
+                                                        'component': 'th',
+                                                        'props': {
+                                                            'class': 'text-start ps-4'
+                                                        },
+                                                        'text': '剧集'
                                                     },
                                                     {
                                                         'component': 'th',
                                                         'props': {
                                                             'class': 'text-start ps-4'
                                                         },
-                                                        'text': '状态'
-                                                    },
-                                                    {
-                                                        'component': 'th',
-                                                        'props': {
-                                                            'class': 'text-start ps-4'
-                                                        },
-                                                        'text': '操作'
+                                                        'text': '种子名称'
                                                     }
                                                 ]
                                             }
