@@ -166,7 +166,7 @@ class SubscribeManager(_PluginBase):
         page = 1
         while True:
             data = down_oper.list_by_page(page=page, count=100)
-            downs.append(data)
+            downs.append(data[:])
             if len(data) < 100:
                 break
             page += 1
