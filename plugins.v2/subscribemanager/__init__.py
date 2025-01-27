@@ -159,55 +159,18 @@ class SubscribeManager(_PluginBase):
         }
 
     def get_page(self) -> List[dict]:
-        subs = SubscribeOper().list()
-        downs = DownloadHistoryOper().list_by_page()
+        down_oper = DownloadHistoryOper()
+
+        
+        downs = []
+        page = 1
+        while True:
+            data = down_oper.list_by_page(page=page, count=100)
+            downs.append(data)
+            if len(data) < 100:
+                break
+            page += 1
         items = []
-        for sub in subs:
-            items.append({
-                'component': 'tr',
-                'content': [
-                    {
-                        'component': 'td',
-                        'text': sub.name
-                    },
-                    {
-                        'component': 'td', 
-                        'text': sub.type
-                    },
-                    {
-                        'component': 'td',
-                        'text': sub.state
-                    },
-                    {
-                        'component': 'td',
-                        'content': [
-                            {
-                                'component': 'VBtn',
-                                'props': {
-                                    'size': 'small',
-                                    'color': 'blue',
-                                    'onClick': {
-                                        'action': 'delete',
-                                        'url': '/api/v1/subscribe/delete',
-                                        'params': {
-                                            'id': sub.id
-                                        }
-                                    }
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VIcon',
-                                        'props': {
-                                            'size': 'small'
-                                        },
-                                        'content': 'mdi-delete'
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            })
         for down in downs:
             items.append({
                 'component': 'tr',
@@ -218,7 +181,7 @@ class SubscribeManager(_PluginBase):
                     },
                     {
                         'component': 'td',
-                        'text': down.title
+                        'text': down.title + " " + down.season + " " + down.episode
                     },
                     {
                         'component': 'td',
