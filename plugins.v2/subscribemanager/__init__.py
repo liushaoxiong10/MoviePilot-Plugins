@@ -44,6 +44,8 @@ class SubscribeManager(_PluginBase):
     _scheduler = None
     _enabled = False
     _onlyonce = False
+    _titles = []
+    _episodes = []
 
     # 弃用
     _notify = False
@@ -66,16 +68,14 @@ class SubscribeManager(_PluginBase):
 
     def init_plugin(self, config: dict = None):
         self.downloader_helper = DownloaderHelper()
-        _titles = []
-        _episodes = []
         if config:
             self._enabled = config.get("enabled")
             self._onlyonce = config.get("onlyonce")
-            _titles = config.get("titles") or []
-            _episodes = config.get("episodes") or []
+            self._titles = config.get("titles") or []
+            self._episodes = config.get("episodes") or []
 
         self.stop_service()
-        self.clear_history(_titles, _episodes)
+        self.clear_history(self._titles, self._episodes)
 
     def clear_history(self, titles: List[str], episodes: List[str]):
         logger.info(f"清除下载历史记录：{titles} {episodes}")
