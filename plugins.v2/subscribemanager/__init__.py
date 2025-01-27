@@ -214,15 +214,15 @@ class SubscribeManager(_PluginBase):
                 'content': [
                     {
                         'component': 'td',
+                        'text': down.id
+                    },
+                    {
+                        'component': 'td',
                         'text': down.title
                     },
                     {
                         'component': 'td',
-                        'text': down.downloader
-                    },
-                    {
-                        'component': 'td',
-                        'text': down.state
+                        'text': down.torrent_name
                     },
                     {
                         'component': 'td',
