@@ -181,7 +181,7 @@ class SubscribeManager(_PluginBase):
                     },
                     {
                         'component': 'td',
-                        'text': down.title + " " + down.season + " " + down.episode
+                        'text': down.title + " " + down.seasons + " " + down.episodes
                     },
                     {
                         'component': 'td',
