@@ -66,6 +66,8 @@ class SubscribeManager(_PluginBase):
 
     def init_plugin(self, config: dict = None):
         self.downloader_helper = DownloaderHelper()
+        _titles = []
+        _episodes = []
         if config:
             self._enabled = config.get("enabled")
             self._onlyonce = config.get("onlyonce")
