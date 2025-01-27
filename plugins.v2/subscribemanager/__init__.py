@@ -12,7 +12,7 @@ from app.log import logger
 from app.plugins import _PluginBase
 from app.schemas import NotificationType, ServiceInfo
 from app.utils.string import StringUtils
-from app.db.downloadhistory_oper import DownloadHistoryOper
+from app.db.downloadhistory_oper import DownloadHistoryOper, DownloadHistory
 from app.db.subscribe_oper import SubscribeOper
 
 lock = threading.Lock()
@@ -110,6 +110,79 @@ class SubscribeManager(_PluginBase):
         return []
 
     def get_form(self) -> Tuple[List[dict], Dict[str, Any]]:
+        # 获取下载历史数据
+        histories = self.get_data()
+        
+        # 构造标题和剧集列表
+        titles = []
+        episodes = []
+        
+        for history in histories:
+            # 标题列表
+            if history.title not in titles:
+                titles.append(history.title)
+            
+            # 剧集列表
+            episode_str = history.title
+            if history.seasons:
+                episode_str += f" {history.seasons}"
+            if history.episodes:
+                episode_str += f" {history.episodes}"
+            if episode_str not in episodes:
+                episodes.append(episode_str)
+                
+        # 将列表转换为选择框选项格式
+        title_options = [{"title": t, "value": t} for t in titles]
+        episode_options = [{"title": e, "value": e} for e in episodes]
+
+        # 标题和剧集选择框
+        title_select = {
+            'component': 'VRow',
+            'content': [
+                {
+                    'component': 'VCol',
+                    'props': {
+                        'cols': 12,
+                    },
+                    'content': [
+                        {
+                            'component': 'VSelect',
+                            'props': {
+                                'model': 'titles',
+                                'label': '标题',
+                                'items': title_options,
+                                'multiple': True,
+                                'chips': True
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        episode_select = {
+            'component': 'VRow', 
+            'content': [
+                {
+                    'component': 'VCol',
+                    'props': {
+                        'cols': 12,
+                    },
+                    'content': [
+                        {
+                            'component': 'VSelect',
+                            'props': {
+                                'model': 'episodes',
+                                'label': '剧集',
+                                'items': episode_options,
+                                'multiple': True,
+                                'chips': True
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
         return [
             {
                 'component': 'VForm',
@@ -151,17 +224,19 @@ class SubscribeManager(_PluginBase):
                             }
                         ]
                     },
+                    title_select,
+                    episode_select
                  ]
             }
         ], {
             "enabled": False,
             "notify": False,
+            "titles": [],
+            "episodes": []
         }
 
-    def get_page(self) -> List[dict]:
-        down_oper = DownloadHistoryOper()
-
-        
+    def get_data(self) -> List[DownloadHistory]:
+        down_oper = DownloadHistoryOper() 
         downs = []
         page = 1
         while True:
@@ -170,8 +245,11 @@ class SubscribeManager(_PluginBase):
             if len(data) < 100:
                 break
             page += 1
+        return downs
+
+    def get_page(self) -> List[dict]:
         items = []
-        for down in downs:
+        for down in self.get_data():
             items.append({
                 'component': 'tr',
                 'content': [
