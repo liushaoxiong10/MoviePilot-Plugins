@@ -76,11 +76,17 @@ class SubscribeManager(_PluginBase):
 
         self.stop_service()
         self.clear_history(self._titles, self._episodes)
+        self._titles = []
+        self._episodes = []
 
     def clear_history(self, titles: List[str], episodes: List[str]):
         logger.info(f"清除下载历史记录：{titles} {episodes}")
-        pass    
-
+        data = self.get_data()
+        down_oper = DownloadHistoryOper()
+        for d in data:
+            if d.title in titles or d.id in episodes: 
+                logger.info(f"清除下载历史记录：{d.id} {d.title} {d.seasons} {d.episodes}")
+            
     def get_state(self) -> bool:
         return True if self._enabled else False
 
