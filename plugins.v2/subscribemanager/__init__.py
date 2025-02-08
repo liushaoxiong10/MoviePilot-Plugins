@@ -76,8 +76,8 @@ class SubscribeManager(_PluginBase):
 
         self.stop_service()
         self.clear_history(self._titles, self._episodes)
-        self._titles = []
-        self._episodes = []
+        config['titles'] = []
+        config['episodes'] = []
 
     def clear_history(self, titles: List[str], episodes: List[str]):
         logger.info(f"清除下载历史记录：{titles} {episodes}")
@@ -152,7 +152,8 @@ class SubscribeManager(_PluginBase):
                                 'label': '标题',
                                 'items': title_options,
                                 'multiple': True,
-                                'chips': True
+                                'chips': True,
+                                'clearable': True
                             }
                         }
                     ]
@@ -176,7 +177,8 @@ class SubscribeManager(_PluginBase):
                                 'label': '剧集',
                                 'items': episode_options,
                                 'multiple': True,
-                                'chips': True
+                                'chips': True,
+                                'clearable': True
                             }
                         }
                     ]
