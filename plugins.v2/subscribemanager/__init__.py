@@ -78,14 +78,70 @@ class SubscribeManager(_PluginBase):
         self.clear_history(self._titles, self._episodes)
         config['titles'] = []
         config['episodes'] = []
+        self.debug()
+
+    def debug(self):
+        downloader_obj = self.__get_downloader("qb")
+        hashs = ["afa2efc0ade18bd41e1862eefe32f26b7b942cc0","829004616e1919c410120a53cc6fc2d04fa49c16"]
+        torrents, error = downloader_obj.get_torrents(ids=hashs)
+        if error:
+            logger.error(f"获取QB种子失败: {error}")
+        for t in torrents:
+            logger.info(f"种子信息: {t}")
+            hashs.remove(t.hash)
+        for h in hashs:
+            logger.info(f"种子 {h} 未找到")
 
     def clear_history(self, titles: List[str], episodes: List[str]):
         logger.info(f"清除下载历史记录：{titles} {episodes}")
         data = self.get_data()
         down_oper = DownloadHistoryOper()
+        downloader_history ={}
         for d in data:
             if d.title in titles or d.id in episodes: 
-                logger.info(f"清除下载历史记录：{d.id} {d.title} {d.seasons} {d.episodes}")
+                tmp = downloader_history.get(d.downloader)
+                if not tmp:
+                    tmp = []
+                tmp.append(d)
+                downloader_history[d.downloader] = tmp
+                logger.info(f"清除下载历史记录：{d.id} {d.title} {d.seasons} {d.episodes} {d.download_hash}")
+        for downloader, history in downloader_history.items():
+            downloader_obj = self.__get_downloader(downloader)
+            # 获取所有历史记录的hash值列表
+            history_hashes = [h.download_hash for h in history]
+            torrents, error = downloader_obj.get_torrents(ids=history_hashes)
+            if error:
+                logger.error(f"获取种子信息失败： {error}")
+                continue
+            for t in torrents:
+                logger.info(f"种子信息: {t}")
+                history_hashes.remove(t.hash)
+            for h in history:
+                # 判断当前历史记录的hash是否在未找到的hash列表中
+                if h.download_hash in history_hashes:
+                    logger.info(f"种子 {h.download_hash} 已不存在于下载器中")
+                    self.delete_data(history=h)
+
+    def delete_data(self, history: DownloadHistory):
+        """
+        从订阅记录中删除该信息
+        """
+        try:
+            down_oper = DownloadHistoryOper()
+            down_oper.delete_history(history.id)
+            logger.info(f"删除下载历史记录：{history.id} {history.title} {history.seasons} {history.episodes} {history.download_hash}")
+            return True
+        except Exception as e:
+            logger.error(f"删除下载历史记录失败：{str(e)}")
+            return False
+
+
+    
+    def delete_download_history(self,history: DownloadHistory):
+        downloader_name = history.downloader
+        downloader_obj = self.__get_downloader(downloader_name)
+
+
             
     def get_state(self) -> bool:
         return True if self._enabled else False
@@ -359,11 +415,7 @@ class SubscribeManager(_PluginBase):
         """
         服务信息
         """
-        if not self._downloaders:
-            logger.warning("尚未配置下载器，请检查配置")
-            return None
-
-        services = self.downloader_helper.get_services(name_filters=self._downloaders)
+        services = self.downloader_helper.get_services(type_filter="qbittorrent")
         if not services:
             logger.warning("获取下载器实例失败，请检查配置")
             return None
